@@ -1,0 +1,50 @@
+:root {
+  --stone-50:  #fafaf9;
+  --stone-100: #f5f5f4;
+  --stone-200: #e7e5e4;
+  --stone-300: #d6d3d1;
+  --stone-400: #a8a3a0;
+  --stone-500: #78716c;
+  --stone-600: #57534e;
+  --stone-700: #44403c;
+  --stone-800: #292524;
+  --stone-900: #1c1917;
+
+  --income-light: #dcfce7;
+  --income:       #16a34a;
+  --income-dark:  #15803d;
+
+  --expense-light: #fee2e2;
+  --expense:       #dc2626;
+  --expense-dark:  #b91c1c;
+
+  --transfer-light: #dbeafe;
+  --transfer:       #2563eb;
+  --transfer-dark:  #1d4ed8;
+
+  --app-max-width: 440px;
+  --radius-sm:  0.375rem;
+  --radius:     0.5rem;
+  --radius-lg:  0.75rem;
+  --radius-xl:  1rem;
+  --radius-2xl: 1.25rem;
+  --radius-full: 9999px;
+
+  --shadow-sm: 0 1px 2px 0 rgba(0,0,0,.05);
+  --shadow:    0 1px 3px 0 rgba(0,0,0,.1), 0 1px 2px -1px rgba(0,0,0,.1);
+  --shadow-lg: 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.1);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background-color: var(--stone-50);
+  color: var(--stone-900);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+}
+
+button { cursor: pointer; background: none; border: none; font: inherit; padding: 0; }
+input, textarea { font: inherit; }
