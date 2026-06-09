@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <mask id="coin-mask">
+      <rect width="512" height="512" fill="white"/>
+      <path d="M80,280 L256,100 L432,280 L432,440 L80,440 Z"
+        fill="none" stroke="black" stroke-width="24" stroke-linejoin="round" stroke-linecap="round"/>
+    </mask>
+  </defs>
+
+<!-- Coin (outline hidden where it crosses the house) -->
+  <circle cx="395" cy="162" r="62"
+    fill="none" stroke="white" stroke-width="12" mask="url(#coin-mask)"/>
+  <text x="395" y="187"
+    text-anchor="middle"
+    fill="white"
+    font-size="64"
+    font-weight="300"
+    font-family="system-ui, -apple-system, sans-serif">¥</text>
+
+  <!-- House: single connected outline -->
+  <path d="M80,280 L256,100 L432,280 L432,440 L80,440 Z"
+    fill="none" stroke="white" stroke-width="14" stroke-linejoin="round" stroke-linecap="round"/>
+
+  <!-- KAKEIBO text -->
+  <text x="256" y="390"
+    text-anchor="middle"
+    fill="white"
+    font-size="52"
+    font-weight="500"
+    font-family="system-ui, -apple-system, sans-serif"
+    letter-spacing="10"
+    opacity="0.9">KAKEIBO</text>
+</svg>
