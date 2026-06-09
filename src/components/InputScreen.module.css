@@ -57,6 +57,35 @@
 }
 .input:focus { outline: 2px solid var(--stone-400); outline-offset: 1px; }
 
+/* トースト */
+.toast {
+  position: fixed;
+  top: 1.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(80, 72, 66, 0.75);
+  color: #fff;
+  padding: 0.45rem 1.1rem;
+  border-radius: var(--radius-full);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  z-index: 100;
+  pointer-events: none;
+  animation: toastIn 0.18s ease, toastOut 0.45s ease 0.55s forwards;
+  white-space: nowrap;
+  backdrop-filter: blur(4px);
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(-0.4rem); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+@keyframes toastOut {
+  from { opacity: 1; transform: translateX(-50%) translateY(0); }
+  to   { opacity: 0; transform: translateX(-50%) translateY(-0.3rem); }
+}
+
 /* 保存ボタン */
 .saveBtn {
   width: 100%;

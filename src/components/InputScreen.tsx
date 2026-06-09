@@ -40,8 +40,14 @@ export function InputScreen({ editingTxn, onEditDone }: InputScreenProps) {
   const [methods, setMethods] = useState<PaymentMethod[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [transactions, setTransactions] = useState<Txn[]>([]);
+  const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => { loadData(); }, []);
+
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 1000);
+  };
 
   useEffect(() => {
     if (!editingTxn) return;
@@ -150,6 +156,7 @@ export function InputScreen({ editingTxn, onEditDone }: InputScreenProps) {
         await addTransaction(txn);
         resetForm();
         await loadData();
+        showToast('登録しました');
       }
     } catch (e) {
       console.error('保存エラー:', e);
@@ -202,6 +209,7 @@ export function InputScreen({ editingTxn, onEditDone }: InputScreenProps) {
 
   return (
     <div className={styles.page}>
+      {toast && <div className={styles.toast}>{toast}</div>}
       <div className={styles.scroll}>
         <div className={styles.kindToggle}>
           <button
