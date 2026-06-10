@@ -10,6 +10,7 @@ import { InputScreen } from './components/InputScreen'
 import { AnalyticsScreen } from './components/AnalyticsScreen'
 import { SettingsScreen } from './components/SettingsScreen'
 import { LoginScreen } from './components/LoginScreen'
+import { IOSInstallBanner } from './components/IOSInstallBanner'
 import type { Txn } from './core/types'
 import styles from './App.module.css'
 
@@ -45,7 +46,12 @@ function App() {
   }
 
   if (user === null) {
-    return <LoginScreen />
+    return (
+      <>
+        <LoginScreen />
+        <IOSInstallBanner />
+      </>
+    )
   }
 
   if (!isInitialized) {
@@ -78,16 +84,19 @@ function App() {
   }
 
   return (
-    <div className={styles.app}>
-      <header className={styles.header}>
-        <h1 className={styles.logo}>Kakeibo</h1>
-        <span className={styles.pageTitle}>{TAB_LABELS[currentTab]}</span>
-      </header>
-      <main className={styles.main}>
-        {renderScreen()}
-      </main>
-      <BottomNav currentTab={currentTab} onTabChange={handleTabChange} />
-    </div>
+    <>
+      <div className={styles.app}>
+        <header className={styles.header}>
+          <h1 className={styles.logo}>Kakeibo</h1>
+          <span className={styles.pageTitle}>{TAB_LABELS[currentTab]}</span>
+        </header>
+        <main className={styles.main}>
+          {renderScreen()}
+        </main>
+        <BottomNav currentTab={currentTab} onTabChange={handleTabChange} />
+      </div>
+      <IOSInstallBanner />
+    </>
   )
 }
 
