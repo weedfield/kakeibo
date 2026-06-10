@@ -13,7 +13,7 @@ export default defineConfig({
         short_name: '家計管理',
         description: '個人用のシンプルな家計管理アプリ',
         theme_color: '#ffffff',
-        background_color: '#ffffff',
+        background_color: 'transparent',
         display: 'standalone',
         start_url: '/',
         scope: '/',
