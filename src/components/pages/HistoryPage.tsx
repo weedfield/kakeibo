@@ -79,8 +79,6 @@ export function HistoryPage({ onEditTxn }: HistoryPageProps) {
         {txn.memo && <p className={styles.txnMemo}>{txn.memo}</p>}
       </div>
       <p className={`${styles.txnAmount} ${styles[txn.kind]}`}>
-        {txn.kind === 'income' && '+'}
-        {txn.kind === 'expense' && '-'}
         ¥{formatCurrency(txn.amount)}
       </p>
     </button>
