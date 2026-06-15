@@ -20,6 +20,13 @@ function App() {
   const [isInitialized, setIsInitialized] = useState(false)
   const [editingTxn, setEditingTxn] = useState<Txn | null>(null)
   const [user, setUser] = useState<User | null | undefined>(undefined)
+  const [isHidden, setIsHidden] = useState(false)
+
+  useEffect(() => {
+    const handler = () => setIsHidden(document.visibilityState === 'hidden')
+    document.addEventListener('visibilitychange', handler)
+    return () => document.removeEventListener('visibilitychange', handler)
+  }, [])
 
   const handleTabChange = (tab: string) => {
     if (tab !== 'input') setEditingTxn(null)
@@ -87,6 +94,11 @@ function App() {
 
   return (
     <>
+      {isHidden && (
+        <div className={styles.privacyMask}>
+          <h1 className={styles.privacyLogo}>Kakeibo</h1>
+        </div>
+      )}
       <div className={styles.app}>
         <header className={styles.header}>
           <h1 className={styles.logo}>Kakeibo</h1>
