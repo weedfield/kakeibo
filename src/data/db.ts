@@ -4,6 +4,7 @@ import {
   getDoc,
   getDocs,
   setDoc,
+  updateDoc,
   deleteDoc,
   query,
   where,
@@ -96,10 +97,30 @@ export async function updateCategory(category: Category): Promise<void> {
 
 export async function deleteCategory(id: string): Promise<void> {
   const childSnap = await getDocs(query(col('categories'), where('parentId', '==', id)));
-  await Promise.all([
-    ...childSnap.docs.map(d => deleteDoc(d.ref)),
-    deleteDoc(ref('categories', id)),
-  ]);
+  const allIds = [id, ...childSnap.docs.map(d => d.id)];
+
+  // 取引に参照されているか確認
+  const txnSnap = await getDocs(col('transactions'));
+  const isReferenced = txnSnap.docs.some(d => {
+    const txn = d.data() as Txn;
+    if (txn.kind === 'income')  return allIds.includes(txn.categoryId);
+    if (txn.kind === 'expense') return allIds.includes(txn.categoryId) || (!!txn.subId && allIds.includes(txn.subId));
+    return false;
+  });
+
+  if (isReferenced) {
+    // 論理削除: archived フラグのみ更新
+    await Promise.all([
+      updateDoc(ref('categories', id), { archived: true }),
+      ...childSnap.docs.map(d => updateDoc(d.ref, { archived: true })),
+    ]);
+  } else {
+    // 物理削除
+    await Promise.all([
+      ...childSnap.docs.map(d => deleteDoc(d.ref)),
+      deleteDoc(ref('categories', id)),
+    ]);
+  }
 }
 
 // 取引
@@ -124,6 +145,28 @@ export async function updateTransaction(txn: Txn): Promise<void> {
 
 export async function deleteTransaction(id: string): Promise<void> {
   await deleteDoc(ref('transactions', id));
+  await pruneArchivedCategories();
+}
+
+async function pruneArchivedCategories(): Promise<void> {
+  const [archivedSnap, txnSnap] = await Promise.all([
+    getDocs(query(col('categories'), where('archived', '==', true))),
+    getDocs(col('transactions')),
+  ]);
+  if (archivedSnap.empty) return;
+
+  const referencedIds = new Set<string>();
+  txnSnap.docs.forEach(d => {
+    const txn = d.data() as Txn;
+    if (txn.kind === 'income')  referencedIds.add(txn.categoryId);
+    if (txn.kind === 'expense') {
+      referencedIds.add(txn.categoryId);
+      if (txn.subId) referencedIds.add(txn.subId);
+    }
+  });
+
+  const orphans = archivedSnap.docs.filter(d => !referencedIds.has(d.id));
+  await Promise.all(orphans.map(d => deleteDoc(d.ref)));
 }
 
 export async function getTransactionsByDateRange(startDate: string, endDate: string): Promise<Txn[]> {

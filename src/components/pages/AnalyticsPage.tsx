@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useAppData } from '../../hooks/useAppData';
+import { useSwipe } from '../../hooks/useSwipe';
 import { DonutChart } from '../molecules/DonutChart';
 import type { PieItem } from '../molecules/DonutChart';
+import { IconChevronDown } from '../atoms/Icon';
 import {
   calculateAllBalances,
   calculateIncomeTotal,
@@ -86,6 +88,8 @@ export function AnalyticsPage() {
     }
   };
 
+  const swipeHandlers = useSwipe(goToNext, goToPrev);
+
   const incomeTotal = calculateIncomeTotal(transactions, start, end);
   const expenseTotal = calculateExpenseTotal(transactions, start, end);
   const net = incomeTotal - expenseTotal;
@@ -168,9 +172,7 @@ export function AnalyticsPage() {
                         ({Math.round((amount / total) * 100)}%)
                       </span>
                     </span>
-                    <svg className={`${styles.chevron} ${isOpen ? styles.chevronOpen : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                      <polyline points="6 9 12 15 18 9" />
-                    </svg>
+                    <IconChevronDown size={16} className={`${styles.chevron} ${isOpen ? styles.chevronOpen : ''}`} />
                   </span>
                 </button>
                 <div className={styles.barTrack}>
@@ -251,7 +253,7 @@ export function AnalyticsPage() {
   };
 
   return (
-    <div className={styles.page}>
+    <div className={styles.page} {...swipeHandlers}>
       <div className={styles.header}>
         <div className={styles.periodToggle}>
           {(['month', 'year'] as PeriodMode[]).map(mode => (

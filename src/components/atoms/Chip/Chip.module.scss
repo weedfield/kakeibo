@@ -8,9 +8,9 @@
   transition: background-color 0.15s, color 0.15s;
 
   &.selected {
-    background: var(--stone-900);
+    background: var(--stone-700);
     color: #fff;
-    border-color: var(--stone-900);
+    border-color: var(--stone-700);
   }
 
   &:disabled {

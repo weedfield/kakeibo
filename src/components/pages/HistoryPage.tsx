@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { deleteTransaction } from '../../data/db';
 import { useAppData } from '../../hooks/useAppData';
+import { useSwipe } from '../../hooks/useSwipe';
 import { formatCurrency, formatDateWithDay } from '../../core/utils';
 import type { Txn } from '../../core/types';
 import styles from './HistoryPage.module.scss';
@@ -32,6 +33,18 @@ export function HistoryPage({ onEditTxn }: HistoryPageProps) {
   const goToNext = () => {
     if (viewMode === 'year') { setYear(y => y + 1); return; }
     if (month === 12) { setYear(y => y + 1); setMonth(1); } else setMonth(m => m + 1);
+  };
+
+  const swipeHandlers = useSwipe(goToNext, goToPrev);
+  const sheetTouchStartY = useRef<number | null>(null);
+  const sheetSwipeHandlers = {
+    onTouchStart: (e: React.TouchEvent) => { sheetTouchStartY.current = e.touches[0].clientY; },
+    onTouchEnd: (e: React.TouchEvent) => {
+      if (sheetTouchStartY.current === null) return;
+      const dy = e.changedTouches[0].clientY - sheetTouchStartY.current;
+      sheetTouchStartY.current = null;
+      if (dy > 80) setSelectedTxn(null);
+    },
   };
 
   const handleDelete = async () => {
@@ -83,16 +96,17 @@ export function HistoryPage({ onEditTxn }: HistoryPageProps) {
         {dates.length === 0 && <p className={styles.empty}>この月に記録はありません</p>}
         {dates.map(date => {
           const txns = grouped[date];
-          const dayIncome  = txns.filter(t => t.kind === 'income').reduce((s, t) => s + t.amount, 0);
-          const dayExpense = txns.filter(t => t.kind === 'expense').reduce((s, t) => s + t.amount, 0);
+          const dayNet = txns.reduce((s, t) =>
+            t.kind === 'income' ? s + t.amount : t.kind === 'expense' ? s - t.amount : s, 0);
           return (
             <div key={date} className={styles.dateGroup}>
               <div className={styles.dateLabel}>
                 <span>{formatDateWithDay(date)}</span>
-                <span className={styles.dayBalance}>
-                  {dayIncome  > 0 && <span className={styles.dayIncome}>¥{formatCurrency(dayIncome)}</span>}
-                  {dayExpense > 0 && <span className={styles.dayExpense}>¥{formatCurrency(dayExpense)}</span>}
-                </span>
+                {dayNet !== 0 && (
+                  <span className={dayNet > 0 ? styles.dayIncome : styles.dayExpense}>
+                    {dayNet > 0 ? '+' : ''}¥{formatCurrency(Math.abs(dayNet))}
+                  </span>
+                )}
               </div>
               <div className={styles.dateCard}>
                 {txns.map(txn => <TxnRow key={txn.id} txn={txn} />)}
@@ -160,14 +174,13 @@ export function HistoryPage({ onEditTxn }: HistoryPageProps) {
             <div className={styles.calDetailDate}>
               <span>{formatDateWithDay(selectedDate)}</span>
               {selectedTxns.length > 0 && (() => {
-                const dayIncome  = selectedTxns.filter(t => t.kind === 'income').reduce((s, t) => s + t.amount, 0);
-                const dayExpense = selectedTxns.filter(t => t.kind === 'expense').reduce((s, t) => s + t.amount, 0);
-                return (
-                  <span className={styles.dayBalance}>
-                    {dayIncome  > 0 && <span className={styles.dayIncome}>+¥{formatCurrency(dayIncome)}</span>}
-                    {dayExpense > 0 && <span className={styles.dayExpense}>-¥{formatCurrency(dayExpense)}</span>}
+                const dayNet = selectedTxns.reduce((s, t) =>
+                  t.kind === 'income' ? s + t.amount : t.kind === 'expense' ? s - t.amount : s, 0);
+                return dayNet !== 0 ? (
+                  <span className={dayNet > 0 ? styles.dayIncome : styles.dayExpense}>
+                    {dayNet > 0 ? '+' : ''}¥{formatCurrency(Math.abs(dayNet))}
                   </span>
-                );
+                ) : null;
               })()}
             </div>
             {selectedTxns.length === 0
@@ -222,7 +235,7 @@ export function HistoryPage({ onEditTxn }: HistoryPageProps) {
   const periodLabel = viewMode === 'year' ? `${year}年` : `${year}年${month}月`;
 
   return (
-    <div className={styles.page}>
+    <div className={styles.page} {...swipeHandlers}>
       <div className={styles.headerWrap}>
         <div className={styles.viewToggle}>
           {([['calendar', '日別'], ['list', '月別'], ['year', '年別']] as [ViewMode, string][]).map(([id, label]) => (
@@ -261,7 +274,8 @@ export function HistoryPage({ onEditTxn }: HistoryPageProps) {
 
       {selectedTxn && (
         <div className={styles.detailOverlay} onClick={() => setSelectedTxn(null)}>
-          <div className={styles.detailSheet} onClick={e => e.stopPropagation()}>
+          <div className={styles.detailSheet} onClick={e => e.stopPropagation()} {...sheetSwipeHandlers}>
+            <div className={styles.dragHandle} />
             <div className={styles.detailHeader}>
               <div>
                 <p className={`${styles.detailKind} ${styles[selectedTxn.kind]}`}>

@@ -123,9 +123,11 @@
   border-radius: var(--radius);
   font-weight: 700;
   font-size: 1rem;
-  background: var(--stone-900);
+  background: var(--stone-700);
   color: #fff;
-  transition: opacity 0.15s;
+  transition: opacity 0.15s, background-color 0.15s;
+
+  &:hover:not(:disabled) { background: var(--stone-800); }
 
   &:disabled { background: var(--stone-300); cursor: not-allowed; }
 }

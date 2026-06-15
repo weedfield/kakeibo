@@ -1,7 +1,8 @@
 .page {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  flex: 1;
+  min-height: 0;
 }
 
 .header {
@@ -26,7 +27,7 @@
   color: var(--stone-600);
   transition: background-color 0.15s, color 0.15s;
 
-  &.active { background: var(--stone-900); color: #fff; }
+  &.active { background: var(--stone-700); color: #fff; }
 }
 
 // 期間ナビ
@@ -60,7 +61,7 @@
   color: var(--stone-600);
   transition: background-color 0.15s, color 0.15s;
 
-  &.active { background: var(--stone-900); color: #fff; }
+  &.active { background: var(--stone-700); color: #fff; }
 }
 
 .content {

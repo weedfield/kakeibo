@@ -30,6 +30,8 @@ export interface Category {
   name: string;
   type: CategoryType;
   parentId: string | null; // null=大分類, 値あり=その親の小分類
+  order?: number;
+  archived?: boolean;      // true=取引参照あり削除（論理削除）
 }
 
 // 収入取引

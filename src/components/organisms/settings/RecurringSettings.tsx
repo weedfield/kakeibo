@@ -299,7 +299,7 @@ export function RecurringSettings() {
               <label className={styles.fieldLabel}>メモ（任意）</label>
               <input type="text" value={memo} onChange={e => setMemo(e.target.value)} className={styles.input} />
             </div>
-            <div className={styles.formBtns}>
+            <div className={styles.sheetBtns}>
               <button onClick={() => handleDelete(editingItem)} className={styles.deleteRecurringBtn}>削除</button>
               <button onClick={handleEditSave} className={styles.addBtn}>保存</button>
             </div>

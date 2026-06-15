@@ -172,10 +172,11 @@ export function InputPage({ editingTxn, onEditDone }: InputPageProps) {
     );
   };
 
-  const expenseCategories = categories.filter((c) => c.type === 'expense' && !c.parentId);
-  const incomeCategories = categories.filter((c) => c.type === 'income');
+  const activeCategories = categories.filter(c => !c.archived);
+  const expenseCategories = activeCategories.filter((c) => c.type === 'expense' && !c.parentId);
+  const incomeCategories = activeCategories.filter((c) => c.type === 'income');
   const subcategories = selectedCategoryId
-    ? categories.filter((c) => c.parentId === selectedCategoryId)
+    ? activeCategories.filter((c) => c.parentId === selectedCategoryId)
     : [];
 
   const canSave =
