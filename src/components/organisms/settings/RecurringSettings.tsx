@@ -53,10 +53,18 @@ export function RecurringSettings() {
     setIncomeCategoryId(''); setFromFundId(''); setToFundId('');
   };
 
+  const isDayValid = (val: string) => {
+    const d = parseInt(val);
+    return !isNaN(d) && (d === 0 || (d >= 1 && d <= 31) || d === 32);
+  };
+
+  const dayLabel = (day: number) =>
+    day === 0 ? '月初' : day === 32 ? '月末' : `${day}日`;
+
   const handleAdd = async () => {
     const amountNum = parseInt(amount);
     const day = parseInt(dayOfMonth);
-    if (!label.trim() || isNaN(amountNum) || amountNum <= 0 || isNaN(day) || day < 1 || day > 28) return;
+    if (!label.trim() || isNaN(amountNum) || amountNum <= 0 || !isDayValid(dayOfMonth)) return;
     if (kind === 'expense' && (!methodId || !categoryId)) return;
     if (kind === 'income' && (!fundId || !incomeCategoryId)) return;
     if (kind === 'transfer' && (!fromFundId || !toFundId || fromFundId === toFundId)) return;
@@ -82,7 +90,7 @@ export function RecurringSettings() {
     if (!editingItem) return;
     const amountNum = parseInt(amount);
     const day = parseInt(dayOfMonth);
-    if (isNaN(amountNum) || amountNum <= 0 || isNaN(day) || day < 1 || day > 28) return;
+    if (isNaN(amountNum) || amountNum <= 0 || !isDayValid(dayOfMonth)) return;
     await updateRecurringTxn({ ...editingItem, label: label.trim(), amount: amountNum, dayOfMonth: day, memo });
     setEditingItem(null);
     await loadData();
@@ -120,7 +128,7 @@ export function RecurringSettings() {
   const incomeCats = categories.filter(c => c.type === 'income' && !c.parentId);
   const subCats = categoryId ? categories.filter(c => c.parentId === categoryId) : [];
 
-  const canAdd = label.trim() && amount && dayOfMonth &&
+  const canAdd = label.trim() && amount && isDayValid(dayOfMonth) &&
     (kind === 'expense' ? methodId && categoryId :
      kind === 'income' ? fundId && incomeCategoryId :
      fromFundId && toFundId && fromFundId !== toFundId);
@@ -140,7 +148,7 @@ export function RecurringSettings() {
             </div>
             <div className={styles.recurringRight}>
               <p className={styles.recurringAmount}>¥{formatCurrency(item.amount)}</p>
-              <p className={styles.recurringDay}>毎月{item.dayOfMonth}日</p>
+              <p className={styles.recurringDay}>毎月{dayLabel(item.dayOfMonth)}</p>
             </div>
           </button>
         ))}
@@ -173,8 +181,15 @@ export function RecurringSettings() {
               <input type="number" inputMode="numeric" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0" className={styles.input} />
             </div>
             <div style={{ flex: 1 }}>
-              <label className={styles.fieldLabel}>毎月何日（1–28）</label>
-              <input type="number" inputMode="numeric" value={dayOfMonth} onChange={e => setDayOfMonth(e.target.value)} placeholder="25" min={1} max={28} className={styles.input} />
+              <label className={styles.fieldLabel}>実行日</label>
+              <select value={dayOfMonth} onChange={e => setDayOfMonth(e.target.value)} className={styles.select}>
+                <option value="">選択</option>
+                <option value="0">月初</option>
+                {Array.from({ length: 31 }, (_, i) => i + 1).map(d => (
+                  <option key={d} value={d}>{d}日</option>
+                ))}
+                <option value="32">月末</option>
+              </select>
             </div>
           </div>
 
@@ -266,8 +281,14 @@ export function RecurringSettings() {
                 <input type="number" inputMode="numeric" value={amount} onChange={e => setAmount(e.target.value)} className={styles.input} />
               </div>
               <div style={{ flex: 1 }}>
-                <label className={styles.fieldLabel}>実行日（1–28）</label>
-                <input type="number" inputMode="numeric" value={dayOfMonth} onChange={e => setDayOfMonth(e.target.value)} min={1} max={28} className={styles.input} />
+                <label className={styles.fieldLabel}>実行日</label>
+                <select value={dayOfMonth} onChange={e => setDayOfMonth(e.target.value)} className={styles.select}>
+                  <option value="0">月初</option>
+                  {Array.from({ length: 31 }, (_, i) => i + 1).map(d => (
+                    <option key={d} value={d}>{d}日</option>
+                  ))}
+                  <option value="32">月末</option>
+                </select>
               </div>
             </div>
             <div>

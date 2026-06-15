@@ -1,48 +1,35 @@
-import { useState, useEffect } from 'react';
-import { getAllFunds, getAllTransactions, getAllBudgets, getAllCategories } from '../../data/db';
+import { useAppData } from '../../hooks/useAppData';
 import { calculateAllBalances, calculateIncomeTotal, calculateExpenseTotal } from '../../core/logic';
 import { formatCurrency, getCurrentMonthRange } from '../../core/utils';
-import type { Fund, Category } from '../../core/types';
-import styles from './BalancePage.module.scss'
+import type { Category } from '../../core/types';
+import styles from './BalancePage.module.scss';
 
 interface BalancePageProps {
   onNavigate: (tab: string) => void;
 }
 
 export function BalancePage(_: BalancePageProps) {
-  const [funds, setFunds] = useState<Fund[]>([]);
-  const [balances, setBalances] = useState<Map<string, number>>(new Map());
-  const [monthlyIncome, setMonthlyIncome] = useState(0);
-  const [monthlyExpense, setMonthlyExpense] = useState(0);
-  const [budgetRows, setBudgetRows] = useState<{ cat: Category; budget: number; spent: number }[]>([]);
+  const { funds, transactions, budgets, categories } = useAppData();
 
-  useEffect(() => { loadData(); }, []);
+  const balances = calculateAllBalances(funds, transactions);
+  const { start, end } = getCurrentMonthRange();
+  const monthlyIncome = calculateIncomeTotal(transactions, start, end);
+  const monthlyExpense = calculateExpenseTotal(transactions, start, end);
 
-  const loadData = async () => {
-    const [fundsData, txnsData, budgetsData, catsData] = await Promise.all([
-      getAllFunds(), getAllTransactions(), getAllBudgets(), getAllCategories(),
-    ]);
-    setFunds(fundsData);
-    setBalances(calculateAllBalances(fundsData, txnsData));
-    const { start, end } = getCurrentMonthRange();
-    setMonthlyIncome(calculateIncomeTotal(txnsData, start, end));
-    setMonthlyExpense(calculateExpenseTotal(txnsData, start, end));
-
-    const monthTxns = txnsData.filter(t => t.date >= start && t.date <= end && t.kind === 'expense');
-    const spentMap = new Map<string, number>();
-    monthTxns.forEach(t => {
+  const spentMap = new Map<string, number>();
+  transactions
+    .filter(t => t.kind === 'expense' && t.date >= start && t.date <= end)
+    .forEach(t => {
       if (t.kind === 'expense') spentMap.set(t.categoryId, (spentMap.get(t.categoryId) || 0) + t.amount);
     });
-    const rows = budgetsData
-      .filter(b => b.amount > 0)
-      .map(b => ({
-        cat: catsData.find(c => c.id === b.categoryId)!,
-        budget: b.amount,
-        spent: spentMap.get(b.categoryId) || 0,
-      }))
-      .filter(r => r.cat);
-    setBudgetRows(rows);
-  };
+  const budgetRows = budgets
+    .filter(b => b.amount > 0)
+    .map(b => ({
+      cat: categories.find(c => c.id === b.categoryId) as Category,
+      budget: b.amount,
+      spent: spentMap.get(b.categoryId) || 0,
+    }))
+    .filter(r => r.cat);
 
   const net = monthlyIncome - monthlyExpense;
   const now = new Date();
@@ -113,7 +100,6 @@ export function BalancePage(_: BalancePageProps) {
           </div>
         ))}
       </div>
-
     </div>
   );
 }

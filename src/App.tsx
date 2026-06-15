@@ -99,15 +99,19 @@ function App() {
           <h1 className={styles.privacyLogo}>Kakeibo</h1>
         </div>
       )}
-      <div className={styles.app}>
+      <div className={styles.layout}>
         <header className={styles.header}>
-          <h1 className={styles.logo}>Kakeibo</h1>
-          <span className={styles.pageTitle}>{TAB_LABELS[currentTab]}</span>
+          <div className={styles.headerInner}>
+            <h1 className={styles.logo}>Kakeibo</h1>
+            <span className={styles.pageTitle}>{TAB_LABELS[currentTab]}</span>
+          </div>
         </header>
-        <main className={styles.main}>
-          {renderScreen()}
-        </main>
-        <BottomNav currentTab={currentTab} onTabChange={handleTabChange} />
+        <div className={styles.app}>
+          <main className={styles.main}>
+            {renderScreen()}
+          </main>
+          <BottomNav currentTab={currentTab} onTabChange={handleTabChange} />
+        </div>
       </div>
       <IOSInstallBanner />
     </>

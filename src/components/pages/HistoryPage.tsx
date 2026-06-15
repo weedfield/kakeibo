@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
-import { getAllTransactions, getAllFunds, getAllPaymentMethods, getAllCategories, deleteTransaction } from '../../data/db';
+import { useState } from 'react';
+import { deleteTransaction } from '../../data/db';
+import { useAppData } from '../../hooks/useAppData';
 import { formatCurrency, formatDateWithDay } from '../../core/utils';
-import type { Txn, Fund, PaymentMethod, Category } from '../../core/types';
+import type { Txn } from '../../core/types';
 import styles from './HistoryPage.module.scss';
 
 type ViewMode = 'calendar' | 'list' | 'year';
@@ -19,24 +20,10 @@ export function HistoryPage({ onEditTxn }: HistoryPageProps) {
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth() + 1);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [allTransactions, setAllTransactions] = useState<Txn[]>([]);
-  const [funds, setFunds] = useState<Fund[]>([]);
-  const [methods, setMethods] = useState<PaymentMethod[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
   const [selectedTxn, setSelectedTxn] = useState<Txn | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
-  useEffect(() => { loadData(); }, []);
-
-  const loadData = async () => {
-    const [txnsData, fundsData, methodsData, categoriesData] = await Promise.all([
-      getAllTransactions(), getAllFunds(), getAllPaymentMethods(), getAllCategories(),
-    ]);
-    setAllTransactions(txnsData);
-    setFunds(fundsData);
-    setMethods(methodsData);
-    setCategories(categoriesData);
-  };
+  const { transactions: allTransactions, funds, methods, categories, reload } = useAppData();
 
   const goToPrev = () => {
     if (viewMode === 'year') { setYear(y => y - 1); return; }
@@ -52,7 +39,7 @@ export function HistoryPage({ onEditTxn }: HistoryPageProps) {
     await deleteTransaction(confirmDeleteId);
     setConfirmDeleteId(null);
     setSelectedTxn(null);
-    await loadData();
+    await reload();
   };
 
   const monthTxns = allTransactions.filter(t => t.date.startsWith(`${year}-${pad(month)}`));
@@ -94,14 +81,25 @@ export function HistoryPage({ onEditTxn }: HistoryPageProps) {
     return (
       <div className={styles.list}>
         {dates.length === 0 && <p className={styles.empty}>この月に記録はありません</p>}
-        {dates.map(date => (
-          <div key={date} className={styles.dateGroup}>
-            <p className={styles.dateLabel}>{formatDateWithDay(date)}</p>
-            <div className={styles.dateCard}>
-              {grouped[date].map(txn => <TxnRow key={txn.id} txn={txn} />)}
+        {dates.map(date => {
+          const txns = grouped[date];
+          const dayIncome  = txns.filter(t => t.kind === 'income').reduce((s, t) => s + t.amount, 0);
+          const dayExpense = txns.filter(t => t.kind === 'expense').reduce((s, t) => s + t.amount, 0);
+          return (
+            <div key={date} className={styles.dateGroup}>
+              <div className={styles.dateLabel}>
+                <span>{formatDateWithDay(date)}</span>
+                <span className={styles.dayBalance}>
+                  {dayIncome  > 0 && <span className={styles.dayIncome}>¥{formatCurrency(dayIncome)}</span>}
+                  {dayExpense > 0 && <span className={styles.dayExpense}>¥{formatCurrency(dayExpense)}</span>}
+                </span>
+              </div>
+              <div className={styles.dateCard}>
+                {txns.map(txn => <TxnRow key={txn.id} txn={txn} />)}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     );
   };
@@ -159,7 +157,19 @@ export function HistoryPage({ onEditTxn }: HistoryPageProps) {
 
         {selectedDate && (
           <div className={styles.calDetail}>
-            <p className={styles.calDetailDate}>{formatDateWithDay(selectedDate)}</p>
+            <div className={styles.calDetailDate}>
+              <span>{formatDateWithDay(selectedDate)}</span>
+              {selectedTxns.length > 0 && (() => {
+                const dayIncome  = selectedTxns.filter(t => t.kind === 'income').reduce((s, t) => s + t.amount, 0);
+                const dayExpense = selectedTxns.filter(t => t.kind === 'expense').reduce((s, t) => s + t.amount, 0);
+                return (
+                  <span className={styles.dayBalance}>
+                    {dayIncome  > 0 && <span className={styles.dayIncome}>+¥{formatCurrency(dayIncome)}</span>}
+                    {dayExpense > 0 && <span className={styles.dayExpense}>-¥{formatCurrency(dayExpense)}</span>}
+                  </span>
+                );
+              })()}
+            </div>
             {selectedTxns.length === 0
               ? <p className={styles.empty}>取引なし</p>
               : <div className={styles.dateCard}>

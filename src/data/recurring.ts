@@ -26,7 +26,10 @@ export async function executeRecurringTransactions(): Promise<void> {
 
   for (const rec of recurring) {
     if (rec.lastExecutedYearMonth === currentYM) continue;
-    const execDay = Math.min(rec.dayOfMonth, daysInMonth);
+    // 0=月初(1日), 32=月末(月の最終日), 1-31=指定日(月の日数に収まるようclamp)
+    const execDay = rec.dayOfMonth === 0 ? 1
+      : rec.dayOfMonth >= 32 ? daysInMonth
+      : Math.min(rec.dayOfMonth, daysInMonth);
     if (todayDay < execDay) continue;
 
     const dateStr = `${currentYM}-${String(execDay).padStart(2, '0')}`;

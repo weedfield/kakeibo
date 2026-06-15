@@ -1,4 +1,4 @@
-import type { Fund, PaymentMethod, Txn, ExpenseTxn } from './types';
+import type { Fund, PaymentMethod, Txn, IncomeTxn, ExpenseTxn } from './types';
 
 /**
  * 資金の現在残高を計算
@@ -113,7 +113,7 @@ export function calculateIncomeTotal(
         txn.date >= startDate &&
         txn.date <= endDate
     )
-    .reduce((sum, txn) => sum + (txn as any).amount, 0);
+    .reduce((sum, txn) => sum + txn.amount, 0);
 }
 
 /**
@@ -131,7 +131,7 @@ export function calculateExpenseTotal(
         txn.date >= startDate &&
         txn.date <= endDate
     )
-    .reduce((sum, txn) => sum + (txn as any).amount, 0);
+    .reduce((sum, txn) => sum + txn.amount, 0);
 }
 
 /**
@@ -145,16 +145,14 @@ export function calculateIncomeByCategory(
   const result = new Map<string, number>();
 
   transactions
-    .filter(
-      txn =>
-        txn.kind === 'income' &&
-        txn.date >= startDate &&
-        txn.date <= endDate
+    .filter((txn): txn is IncomeTxn =>
+      txn.kind === 'income' &&
+      txn.date >= startDate &&
+      txn.date <= endDate
     )
     .forEach(txn => {
-      const income = txn as any;
-      const current = result.get(income.categoryId) || 0;
-      result.set(income.categoryId, current + income.amount);
+      const current = result.get(txn.categoryId) || 0;
+      result.set(txn.categoryId, current + txn.amount);
     });
 
   return result;
@@ -171,16 +169,14 @@ export function calculateExpenseByCategory(
   const result = new Map<string, number>();
 
   transactions
-    .filter(
-      txn =>
-        txn.kind === 'expense' &&
-        txn.date >= startDate &&
-        txn.date <= endDate
+    .filter((txn): txn is ExpenseTxn =>
+      txn.kind === 'expense' &&
+      txn.date >= startDate &&
+      txn.date <= endDate
     )
     .forEach(txn => {
-      const expense = txn as ExpenseTxn;
-      const current = result.get(expense.categoryId) || 0;
-      result.set(expense.categoryId, current + expense.amount);
+      const current = result.get(txn.categoryId) || 0;
+      result.set(txn.categoryId, current + txn.amount);
     });
 
   return result;
@@ -197,16 +193,14 @@ export function calculateExpenseByMethod(
   const result = new Map<string, number>();
 
   transactions
-    .filter(
-      txn =>
-        txn.kind === 'expense' &&
-        txn.date >= startDate &&
-        txn.date <= endDate
+    .filter((txn): txn is ExpenseTxn =>
+      txn.kind === 'expense' &&
+      txn.date >= startDate &&
+      txn.date <= endDate
     )
     .forEach(txn => {
-      const expense = txn as ExpenseTxn;
-      const current = result.get(expense.methodId) || 0;
-      result.set(expense.methodId, current + expense.amount);
+      const current = result.get(txn.methodId) || 0;
+      result.set(txn.methodId, current + txn.amount);
     });
 
   return result;

@@ -1,18 +1,11 @@
 import { useState, useEffect } from 'react';
-import {
-  getAllFunds,
-  getAllPaymentMethods,
-  getAllCategories,
-  getAllTransactions,
-  getAllBudgets,
-  addTransaction,
-  updateTransaction,
-} from '../../data/db';
+import { addTransaction, updateTransaction } from '../../data/db';
+import { useAppData } from '../../hooks/useAppData';
 import { computeDeductions, calculateBalance } from '../../core/logic';
 import { generateId, getTodayString, formatCurrency, getCurrentMonthRange } from '../../core/utils';
 import { NumberPad } from '../molecules/NumberPad';
 import { Chip } from '../atoms/Chip';
-import type { Fund, PaymentMethod, Category, Txn, Budget } from '../../core/types';
+import type { Txn } from '../../core/types';
 import styles from './InputPage.module.scss';
 
 type InputKind = 'expense' | 'income' | 'transfer';
@@ -38,14 +31,9 @@ export function InputPage({ editingTxn, onEditDone }: InputPageProps) {
   const [fromFundId, setFromFundId] = useState('');
   const [toFundId, setToFundId] = useState('');
 
-  const [funds, setFunds] = useState<Fund[]>([]);
-  const [methods, setMethods] = useState<PaymentMethod[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [transactions, setTransactions] = useState<Txn[]>([]);
-  const [budgets, setBudgets] = useState<Budget[]>([]);
   const [toast, setToast] = useState<string | null>(null);
 
-  useEffect(() => { loadData(); }, []);
+  const { funds, methods, categories, transactions, budgets, reload } = useAppData();
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -70,21 +58,6 @@ export function InputPage({ editingTxn, onEditDone }: InputPageProps) {
       setToFundId(editingTxn.toFundId);
     }
   }, [editingTxn]);
-
-  const loadData = async () => {
-    const [fundsData, methodsData, categoriesData, txnsData, budgetsData] = await Promise.all([
-      getAllFunds(),
-      getAllPaymentMethods(),
-      getAllCategories(),
-      getAllTransactions(),
-      getAllBudgets(),
-    ]);
-    setFunds(fundsData);
-    setMethods(methodsData);
-    setCategories(categoriesData);
-    setTransactions(txnsData);
-    setBudgets(budgetsData);
-  };
 
   const resetForm = () => {
     setAmount('');
@@ -160,7 +133,7 @@ export function InputPage({ editingTxn, onEditDone }: InputPageProps) {
       } else {
         await addTransaction(txn);
         resetForm();
-        await loadData();
+        await reload();
         showToast('登録しました');
       }
     } catch (e) {

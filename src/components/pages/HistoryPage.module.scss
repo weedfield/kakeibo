@@ -59,7 +59,18 @@
 
 .empty { text-align: center; color: var(--stone-500); margin-top: 2rem; }
 
-.dateLabel { font-size: 0.875rem; color: var(--stone-500); margin-bottom: 0.5rem; }
+.dateLabel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+  color: var(--stone-500);
+  margin-bottom: 0.5rem;
+}
+
+.dayBalance { display: flex; gap: 0.5rem; }
+.dayIncome  { color: var(--income);  font-size: 0.8125rem; font-weight: 500; }
+.dayExpense { color: var(--expense); font-size: 0.8125rem; font-weight: 500; }
 
 .dateCard {
   background: #fff;
@@ -179,7 +190,14 @@
   gap: 0.5rem;
 }
 
-.calDetailDate { font-size: 0.875rem; color: var(--stone-500); font-weight: 500; }
+.calDetailDate {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+  color: var(--stone-500);
+  font-weight: 500;
+}
 
 // 年別
 .yearCard {

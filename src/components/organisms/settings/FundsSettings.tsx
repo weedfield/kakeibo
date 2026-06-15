@@ -4,6 +4,7 @@ import {
   getAllPaymentMethods,
   getAllTransactions,
   addFund,
+  updateFund,
   deleteFund,
 } from '../../../data/db';
 import { calculateAllBalances } from '../../../core/logic';
@@ -22,6 +23,7 @@ export function FundsSettings() {
   const [methods, setMethods] = useState<PaymentMethod[]>([]);
   const [balances, setBalances] = useState<Map<string, number>>(new Map());
   const [showForm, setShowForm] = useState(false);
+  const [editingFund, setEditingFund] = useState<Fund | null>(null);
   const [name, setName] = useState('');
   const [type, setType] = useState<FundType>('bank');
   const [initialBalance, setInitialBalance] = useState('');
@@ -42,6 +44,12 @@ export function FundsSettings() {
   const isFundReferenced = (fundId: string) =>
     methods.some(m => m.primaryFundId === fundId || m.fallbackFundId === fundId);
 
+  const resetForm = () => {
+    setName('');
+    setType('bank');
+    setInitialBalance('');
+  };
+
   const handleAdd = async () => {
     if (!name.trim()) return;
     await addFund({
@@ -50,11 +58,35 @@ export function FundsSettings() {
       type,
       initialBalance: parseInt(initialBalance) || 0,
     });
-    setName('');
-    setType('bank');
-    setInitialBalance('');
+    resetForm();
     setShowForm(false);
     await loadData();
+  };
+
+  const handleEditStart = (fund: Fund) => {
+    setEditingFund(fund);
+    setName(fund.name);
+    setType(fund.type);
+    setInitialBalance(String(fund.initialBalance));
+    setShowForm(false);
+  };
+
+  const handleEditSave = async () => {
+    if (!editingFund || !name.trim()) return;
+    await updateFund({
+      ...editingFund,
+      name: name.trim(),
+      type,
+      initialBalance: parseInt(initialBalance) || 0,
+    });
+    setEditingFund(null);
+    resetForm();
+    await loadData();
+  };
+
+  const handleEditCancel = () => {
+    setEditingFund(null);
+    resetForm();
   };
 
   const handleDelete = async (fund: Fund) => {
@@ -68,6 +100,46 @@ export function FundsSettings() {
     }
   };
 
+  const FormFields = () => (
+    <>
+      <div>
+        <label className={styles.fieldLabel}>名前</label>
+        <input
+          type="text"
+          value={name}
+          onChange={e => setName(e.target.value)}
+          placeholder="例：銀行口座"
+          className={styles.input}
+        />
+      </div>
+      <div>
+        <label className={styles.fieldLabel}>種別</label>
+        <div className={styles.segSmall}>
+          {(['cash', 'bank', 'prepaid'] as FundType[]).map(t => (
+            <button
+              key={t}
+              onClick={() => setType(t)}
+              className={`${styles.segSmallBtn} ${type === t ? styles.active : ''}`}
+            >
+              {FUND_TYPE_LABEL[t]}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div>
+        <label className={styles.fieldLabel}>初期残高（円）</label>
+        <input
+          type="number"
+          value={initialBalance}
+          onChange={e => setInitialBalance(e.target.value)}
+          placeholder="0"
+          inputMode="numeric"
+          className={styles.input}
+        />
+      </div>
+    </>
+  );
+
   return (
     <>
       <div className={styles.card}>
@@ -80,58 +152,38 @@ export function FundsSettings() {
                 <span>¥{formatCurrency(balances.get(fund.id) || 0)}</span>
               </p>
             </div>
-            <button
-              onClick={() => handleDelete(fund)}
-              disabled={isFundReferenced(fund.id)}
-              className={styles.delBtn}
-            >
-              ✕
-            </button>
+            <div className={styles.rowActions}>
+              <button onClick={() => handleEditStart(fund)} className={styles.editBtn}>✎</button>
+              <button
+                onClick={() => handleDelete(fund)}
+                disabled={isFundReferenced(fund.id)}
+                className={styles.delBtn}
+              >
+                ✕
+              </button>
+            </div>
           </div>
         ))}
         {funds.length === 0 && <p className={styles.empty}>資金がありません</p>}
       </div>
 
-      {showForm ? (
+      {editingFund && (
+        <div className={styles.form}>
+          <p className={styles.formTitle}>「{editingFund.name}」を編集</p>
+          <FormFields />
+          <div className={styles.formBtns}>
+            <button onClick={handleEditCancel} className={styles.cancelBtn}>キャンセル</button>
+            <button onClick={handleEditSave} disabled={!name.trim()} className={styles.addBtn}>保存</button>
+          </div>
+        </div>
+      )}
+
+      {!editingFund && (showForm ? (
         <div className={styles.form}>
           <p className={styles.formTitle}>資金を追加</p>
-          <div>
-            <label className={styles.fieldLabel}>名前</label>
-            <input
-              type="text"
-              value={name}
-              onChange={e => setName(e.target.value)}
-              placeholder="例：銀行口座"
-              className={styles.input}
-            />
-          </div>
-          <div>
-            <label className={styles.fieldLabel}>種別</label>
-            <div className={styles.segSmall}>
-              {(['cash', 'bank', 'prepaid'] as FundType[]).map(t => (
-                <button
-                  key={t}
-                  onClick={() => setType(t)}
-                  className={`${styles.segSmallBtn} ${type === t ? styles.active : ''}`}
-                >
-                  {FUND_TYPE_LABEL[t]}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div>
-            <label className={styles.fieldLabel}>初期残高（円）</label>
-            <input
-              type="number"
-              value={initialBalance}
-              onChange={e => setInitialBalance(e.target.value)}
-              placeholder="0"
-              inputMode="numeric"
-              className={styles.input}
-            />
-          </div>
+          <FormFields />
           <div className={styles.formBtns}>
-            <button onClick={() => setShowForm(false)} className={styles.cancelBtn}>キャンセル</button>
+            <button onClick={() => { setShowForm(false); resetForm(); }} className={styles.cancelBtn}>キャンセル</button>
             <button onClick={handleAdd} disabled={!name.trim()} className={styles.addBtn}>追加</button>
           </div>
         </div>
@@ -139,7 +191,7 @@ export function FundsSettings() {
         <button onClick={() => setShowForm(true)} className={styles.addTrigger}>
           ＋ 資金を追加
         </button>
-      )}
+      ))}
     </>
   );
 }
