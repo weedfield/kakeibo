@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getAllCategories, getAllBudgets, setBudget, deleteBudget } from '../../../data/db';
 import type { Category } from '../../../core/types';
-import styles from './settings.module.css';
+import styles from './settings.module.scss';
 
 export function BudgetsSettings() {
   const [categories, setCategories] = useState<Category[]>([]);

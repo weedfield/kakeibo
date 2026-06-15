@@ -7,7 +7,7 @@ import {
 } from '../../../data/db';
 import { generateId } from '../../../core/utils';
 import type { Fund, PaymentMethod, SplitMode } from '../../../core/types';
-import styles from './settings.module.css';
+import styles from './settings.module.scss';
 
 export function MethodsSettings() {
   const [methods, setMethods] = useState<PaymentMethod[]>([]);

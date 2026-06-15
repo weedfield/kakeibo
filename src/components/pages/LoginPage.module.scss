@@ -8,7 +8,11 @@
   padding: 0 2rem;
 }
 
-.hero { text-align: center; margin-bottom: 3rem; }
+.hero {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
 .title {
   font-size: 1.5rem;
   font-weight: 700;
@@ -17,7 +21,11 @@
   text-transform: uppercase;
   margin-bottom: 0.5rem;
 }
-.subtitle { font-size: 0.875rem; color: var(--stone-500); }
+
+.subtitle {
+  font-size: 0.875rem;
+  color: var(--stone-500);
+}
 
 .googleBtn {
   display: flex;
@@ -31,9 +39,25 @@
   width: 100%;
   max-width: 20rem;
   transition: box-shadow 0.15s;
-}
-.googleBtn:hover { box-shadow: var(--shadow); }
-.googleIcon { width: 1.25rem; height: 1.25rem; flex-shrink: 0; }
-.googleBtnLabel { color: var(--stone-700); font-weight: 500; }
 
-.note { font-size: 0.75rem; color: var(--stone-400); margin-top: 2rem; text-align: center; line-height: 1.6; }
+  &:hover { box-shadow: var(--shadow); }
+}
+
+.googleIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+}
+
+.googleBtnLabel {
+  color: var(--stone-700);
+  font-weight: 500;
+}
+
+.note {
+  font-size: 0.75rem;
+  color: var(--stone-400);
+  margin-top: 2rem;
+  text-align: center;
+  line-height: 1.6;
+}

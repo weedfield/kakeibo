@@ -6,6 +6,15 @@
   background: #fff;
   color: var(--stone-700);
   transition: background-color 0.15s, color 0.15s;
+
+  &.selected {
+    background: var(--stone-900);
+    color: #fff;
+    border-color: var(--stone-900);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 }
-.chip.selected { background: var(--stone-900); color: #fff; border-color: var(--stone-900); }
-.chip:disabled { opacity: 0.5; cursor: not-allowed; }

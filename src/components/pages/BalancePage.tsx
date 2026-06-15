@@ -3,7 +3,7 @@ import { getAllFunds, getAllTransactions, getAllBudgets, getAllCategories } from
 import { calculateAllBalances, calculateIncomeTotal, calculateExpenseTotal } from '../../core/logic';
 import { formatCurrency, getCurrentMonthRange } from '../../core/utils';
 import type { Fund, Category } from '../../core/types';
-import styles from './BalancePage.module.css'
+import styles from './BalancePage.module.scss'
 
 interface BalancePageProps {
   onNavigate: (tab: string) => void;

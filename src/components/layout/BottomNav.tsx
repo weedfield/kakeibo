@@ -1,4 +1,4 @@
-import styles from './BottomNav.module.css'
+import styles from './BottomNav.module.scss'
 
 interface BottomNavProps {
   currentTab: string;

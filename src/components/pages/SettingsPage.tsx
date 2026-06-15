@@ -6,7 +6,7 @@ import { MethodsSettings } from '../organisms/settings/MethodsSettings';
 import { CategoriesSettings } from '../organisms/settings/CategoriesSettings';
 import { BudgetsSettings } from '../organisms/settings/BudgetsSettings';
 import { RecurringSettings } from '../organisms/settings/RecurringSettings';
-import styles from '../organisms/settings/settings.module.css';
+import styles from '../organisms/settings/settings.module.scss';
 
 type Segment = 'funds' | 'methods' | 'categories' | 'budgets' | 'recurring';
 

@@ -74,8 +74,9 @@
   padding: 0.4rem 0.875rem;
   border-radius: var(--radius-full);
   transition: opacity 0.15s;
+
+  &:hover { opacity: 0.85; }
 }
-.installBtn:hover { opacity: 0.85; }
 
 .close {
   flex-shrink: 0;
@@ -87,11 +88,11 @@
   opacity: 0.6;
   border-radius: var(--radius-full);
   transition: opacity 0.15s;
-}
 
-.close:hover { opacity: 1; }
+  &:hover { opacity: 1; }
 
-.close svg {
-  width: 1rem;
-  height: 1rem;
+  svg {
+    width: 1rem;
+    height: 1rem;
+  }
 }

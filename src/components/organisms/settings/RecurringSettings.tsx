@@ -10,7 +10,7 @@ import {
 } from '../../../data/db';
 import { generateId, formatCurrency } from '../../../core/utils';
 import type { Fund, PaymentMethod, Category, RecurringTxn } from '../../../core/types';
-import styles from './settings.module.css';
+import styles from './settings.module.scss';
 
 type RecurringKind = 'expense' | 'income' | 'transfer';
 

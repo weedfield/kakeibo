@@ -6,7 +6,7 @@ import {
 } from '../../../data/db';
 import { generateId } from '../../../core/utils';
 import type { Category, CategoryType } from '../../../core/types';
-import styles from './settings.module.css';
+import styles from './settings.module.scss';
 
 export function CategoriesSettings() {
   const [categories, setCategories] = useState<Category[]>([]);

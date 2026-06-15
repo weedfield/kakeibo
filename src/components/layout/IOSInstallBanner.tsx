@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import styles from './IOSInstallBanner.module.css';
+import styles from './IOSInstallBanner.module.scss';
 
 const DISMISSED_KEY = 'install-banner-dismissed';
 

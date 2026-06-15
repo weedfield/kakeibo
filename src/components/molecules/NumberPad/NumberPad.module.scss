@@ -13,6 +13,7 @@
   font-weight: 600;
   color: var(--stone-800);
   transition: background-color 0.1s;
+
+  &:hover  { background-color: var(--stone-50); }
+  &:active { background-color: var(--stone-100); }
 }
-.key:hover { background-color: var(--stone-50); }
-.key:active { background-color: var(--stone-100); }

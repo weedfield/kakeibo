@@ -16,7 +16,7 @@ import {
 } from '../../core/logic';
 import { formatCurrency } from '../../core/utils';
 import type { Fund, PaymentMethod, Category, Txn } from '../../core/types';
-import styles from './AnalyticsPage.module.css';
+import styles from './AnalyticsPage.module.scss';
 
 type PeriodMode = 'month' | 'year';
 type ViewMode = 'monthly' | 'category' | 'fund' | 'method';

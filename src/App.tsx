@@ -13,7 +13,7 @@ import { SettingsPage } from './components/pages/SettingsPage'
 import { LoginPage } from './components/pages/LoginPage'
 import { IOSInstallBanner } from './components/layout/IOSInstallBanner'
 import type { Txn } from './core/types'
-import styles from './App.module.css'
+import styles from './App.module.scss'
 
 function App() {
   const [currentTab, setCurrentTab] = useState('balance')

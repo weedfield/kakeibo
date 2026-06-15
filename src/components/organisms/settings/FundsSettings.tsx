@@ -9,7 +9,7 @@ import {
 import { calculateAllBalances } from '../../../core/logic';
 import { generateId, formatCurrency } from '../../../core/utils';
 import type { Fund, PaymentMethod, FundType } from '../../../core/types';
-import styles from './settings.module.css';
+import styles from './settings.module.scss';
 
 const FUND_TYPE_LABEL: Record<FundType, string> = {
   cash: '現金',

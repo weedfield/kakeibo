@@ -1,6 +1,8 @@
 .nav {
   position: fixed;
-  bottom: 0; left: 0; right: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
   background: #fff;
   border-top: 1px solid var(--stone-200);
   z-index: 40;
@@ -23,15 +25,24 @@
   padding: 0.25rem 0.75rem;
   color: var(--stone-400);
   transition: color 0.15s;
+
+  &.active { color: var(--stone-900); }
 }
-.tabBtn.active { color: var(--stone-900); }
 
-.tabLabel { font-size: 0.625rem; font-weight: 500; }
+.tabLabel {
+  font-size: 0.625rem;
+  font-weight: 500;
+}
 
-.addBtn { display: flex; flex-direction: column; align-items: center; }
+.addBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 
 .addBtnInner {
-  width: 3.5rem; height: 3.5rem;
+  width: 3.5rem;
+  height: 3.5rem;
   border-radius: var(--radius-full);
   background-color: var(--stone-900);
   display: flex;
@@ -40,5 +51,6 @@
   box-shadow: var(--shadow-lg);
   color: #fff;
   transition: background-color 0.15s;
+
+  &.active { background-color: var(--stone-800); }
 }
-.addBtnInner.active { background-color: var(--stone-800); }

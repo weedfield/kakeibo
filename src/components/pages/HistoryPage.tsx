@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { getAllTransactions, getAllFunds, getAllPaymentMethods, getAllCategories, deleteTransaction } from '../../data/db';
 import { formatCurrency, formatDateWithDay } from '../../core/utils';
 import type { Txn, Fund, PaymentMethod, Category } from '../../core/types';
-import styles from './HistoryPage.module.css';
+import styles from './HistoryPage.module.scss';
 
 type ViewMode = 'calendar' | 'list' | 'year';
 

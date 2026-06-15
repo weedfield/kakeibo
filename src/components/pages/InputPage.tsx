@@ -13,7 +13,7 @@ import { generateId, getTodayString, formatCurrency, getCurrentMonthRange } from
 import { NumberPad } from '../molecules/NumberPad';
 import { Chip } from '../atoms/Chip';
 import type { Fund, PaymentMethod, Category, Txn, Budget } from '../../core/types';
-import styles from './InputPage.module.css';
+import styles from './InputPage.module.scss';
 
 type InputKind = 'expense' | 'income' | 'transfer';
 
