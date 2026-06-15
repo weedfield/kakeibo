@@ -69,3 +69,32 @@ export interface TransferTxn {
 
 // 取引（discriminated union）
 export type Txn = IncomeTxn | ExpenseTxn | TransferTxn;
+
+// 繰り返し取引テンプレート
+export interface RecurringTxn {
+  id: string;
+  label: string;               // 表示名（例: "Netflix", "給与"）
+  kind: 'expense' | 'income' | 'transfer';
+  dayOfMonth: number;          // 毎月何日に実行するか（1–28）
+  amount: number;
+  memo: string;
+  // expense
+  methodId: string | null;
+  categoryId: string | null;
+  subId: string | null;
+  // income
+  fundId: string | null;
+  incomeCategoryId: string | null;
+  // transfer
+  fromFundId: string | null;
+  toFundId: string | null;
+  // 実行管理
+  lastExecutedYearMonth: string | null; // "YYYY-MM"
+}
+
+// 月次予算
+export interface Budget {
+  id: string;
+  categoryId: string; // 支出カテゴリ（親）のID
+  amount: number;     // 月の予算額（円）
+}

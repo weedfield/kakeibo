@@ -9,7 +9,7 @@ import {
   where,
 } from 'firebase/firestore';
 import { firestoreDb, auth } from './firebase';
-import type { Fund, PaymentMethod, Category, Txn } from '../core/types';
+import type { Fund, PaymentMethod, Category, Txn, Budget, RecurringTxn } from '../core/types';
 
 function uid(): string {
   const u = auth.currentUser;
@@ -129,4 +129,36 @@ export async function deleteTransaction(id: string): Promise<void> {
 export async function getTransactionsByDateRange(startDate: string, endDate: string): Promise<Txn[]> {
   const all = await getAllTransactions();
   return all.filter(t => t.date >= startDate && t.date <= endDate);
+}
+
+// 繰り返し取引
+export async function getAllRecurringTxns(): Promise<RecurringTxn[]> {
+  const snap = await getDocs(col('recurring'));
+  return snap.docs.map(d => d.data() as RecurringTxn);
+}
+
+export async function addRecurringTxn(r: RecurringTxn): Promise<void> {
+  await setDoc(ref('recurring', r.id), r);
+}
+
+export async function updateRecurringTxn(r: RecurringTxn): Promise<void> {
+  await setDoc(ref('recurring', r.id), r);
+}
+
+export async function deleteRecurringTxn(id: string): Promise<void> {
+  await deleteDoc(ref('recurring', id));
+}
+
+// 予算
+export async function getAllBudgets(): Promise<Budget[]> {
+  const snap = await getDocs(col('budgets'));
+  return snap.docs.map(d => d.data() as Budget);
+}
+
+export async function setBudget(budget: Budget): Promise<void> {
+  await setDoc(ref('budgets', budget.id), budget);
+}
+
+export async function deleteBudget(id: string): Promise<void> {
+  await deleteDoc(ref('budgets', id));
 }

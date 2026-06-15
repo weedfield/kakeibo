@@ -1,8 +1,8 @@
 import { signInWithPopup } from 'firebase/auth';
-import { auth, googleProvider } from '../data/firebase';
-import styles from './LoginScreen.module.css'
+import { auth, googleProvider } from '../../data/firebase';
+import styles from './LoginPage.module.css'
 
-export function LoginScreen() {
+export function LoginPage() {
   const handleLogin = async () => {
     await signInWithPopup(auth, googleProvider);
   };

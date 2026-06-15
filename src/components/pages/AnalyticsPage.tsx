@@ -4,7 +4,7 @@ import {
   getAllFunds,
   getAllPaymentMethods,
   getAllCategories,
-} from '../data/db';
+} from '../../data/db';
 import {
   calculateAllBalances,
   calculateIncomeTotal,
@@ -13,10 +13,10 @@ import {
   calculateExpenseByCategory,
   calculateExpenseByMethod,
   calculateFundFlow,
-} from '../core/logic';
-import { formatCurrency } from '../core/utils';
-import type { Fund, PaymentMethod, Category, Txn } from '../core/types';
-import styles from './AnalyticsScreen.module.css';
+} from '../../core/logic';
+import { formatCurrency } from '../../core/utils';
+import type { Fund, PaymentMethod, Category, Txn } from '../../core/types';
+import styles from './AnalyticsPage.module.css';
 
 type PeriodMode = 'month' | 'year';
 type ViewMode = 'monthly' | 'category' | 'fund' | 'method';
@@ -91,13 +91,22 @@ function getYearRange(year: number): { start: string; end: string } {
   return { start: `${year}-01-01`, end: `${year}-12-31` };
 }
 
-export function AnalyticsScreen() {
+export function AnalyticsPage() {
   const now = new Date();
   const [periodMode, setPeriodMode] = useState<PeriodMode>('month');
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth() + 1);
   const [viewMode, setViewMode] = useState<ViewMode>('monthly');
   const [categoryViewType, setCategoryViewType] = useState<'income' | 'expense'>('expense');
+  const [expandedCats, setExpandedCats] = useState<Set<string>>(new Set());
+
+  const toggleCat = (id: string) => {
+    setExpandedCats(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
 
   const [transactions, setTransactions] = useState<Txn[]>([]);
   const [funds, setFunds] = useState<Fund[]>([]);
@@ -207,23 +216,60 @@ export function AnalyticsScreen() {
         <div className={styles.barSection}>
           {parentAmounts.map(({ cat, amount }, i) => {
             const color = palette[i % palette.length];
+            const isOpen = expandedCats.has(cat.id);
+            const childIds = categories.filter(c => c.parentId === cat.id).map(c => c.id);
+            const catTxns = transactions
+              .filter(txn => {
+                if (txn.date < start || txn.date > end) return false;
+                if (catType === 'income') return txn.kind === 'income' && txn.categoryId === cat.id;
+                return txn.kind === 'expense' && (txn.categoryId === cat.id || childIds.includes(txn.categoryId));
+              })
+              .sort((a, b) => b.date.localeCompare(a.date));
             return (
               <div key={cat.id} className={styles.barRow}>
-                <div className={styles.barHeader}>
+                <button className={styles.barHeader} onClick={() => toggleCat(cat.id)}>
                   <span className={styles.barName}>{cat.name}</span>
-                  <span className={styles.barValue}>
-                    ¥{formatCurrency(amount)}
-                    <span className={styles.barPct}>
-                      ({Math.round((amount / total) * 100)}%)
+                  <span className={styles.barValueRow}>
+                    <span className={styles.barValue}>
+                      ¥{formatCurrency(amount)}
+                      <span className={styles.barPct}>
+                        ({Math.round((amount / total) * 100)}%)
+                      </span>
                     </span>
+                    <svg className={`${styles.chevron} ${isOpen ? styles.chevronOpen : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
                   </span>
-                </div>
+                </button>
                 <div className={styles.barTrack}>
-                  <div
-                    className={styles.barFill}
-                    style={{ width: `${(amount / max) * 100}%`, backgroundColor: color }}
-                  />
+                  <div className={styles.barFill} style={{ width: `${(amount / max) * 100}%`, backgroundColor: color }} />
                 </div>
+                {isOpen && (
+                  <div className={styles.accordion}>
+                    {catTxns.length === 0 ? (
+                      <p className={styles.accordionEmpty}>取引なし</p>
+                    ) : catTxns.map(txn => {
+                      const [, mm, dd] = txn.date.split('-');
+                      const subCat = txn.kind === 'expense' && txn.subId
+                        ? categories.find(c => c.id === txn.subId)
+                        : null;
+                      const label = subCat ? subCat.name : (txn.memo || '─');
+                      const sub = subCat && txn.memo ? txn.memo : null;
+                      return (
+                        <div key={txn.id} className={styles.accordionRow}>
+                          <span className={styles.accordionDate}>{parseInt(mm)}月{parseInt(dd)}日</span>
+                          <span className={styles.accordionLabel}>
+                            {label}
+                            {sub && <span className={styles.accordionMemo}>{sub}</span>}
+                          </span>
+                          <span className={`${styles.accordionAmount} ${catType === 'income' ? styles.income : styles.expense}`}>
+                            ¥{formatCurrency(txn.amount)}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             );
           })}
@@ -331,7 +377,7 @@ export function AnalyticsScreen() {
                 <div className={`${styles.summaryCard} ${styles.netCard}`}>
                   <span className={styles.summaryLabel}>収支</span>
                   <span className={`${styles.summaryValue} ${net >= 0 ? styles.pos : styles.neg}`}>
-                    {net >= 0 ? '+' : '−'}¥{formatCurrency(Math.abs(net))}
+                    {net < 0 ? '−' : ''}¥{formatCurrency(Math.abs(net))}
                   </span>
                 </div>
               </>
@@ -359,7 +405,7 @@ export function AnalyticsScreen() {
                           {expense > 0 ? `¥${formatCurrency(expense)}` : '─'}
                         </td>
                         <td className={`${styles.right} ${!hasData ? styles.tdMuted : n >= 0 ? styles.tdIncome : styles.tdExpense}`}>
-                          {!hasData ? '─' : `${n >= 0 ? '+' : '−'}¥${formatCurrency(Math.abs(n))}`}
+                          {!hasData ? '─' : `${n < 0 ? '−' : ''}¥${formatCurrency(Math.abs(n))}`}
                         </td>
                       </tr>
                     );
@@ -371,7 +417,7 @@ export function AnalyticsScreen() {
                     <td className={`${styles.right} ${styles.tdIncome}`}>¥{formatCurrency(incomeTotal)}</td>
                     <td className={`${styles.right} ${styles.tdExpense}`}>¥{formatCurrency(expenseTotal)}</td>
                     <td className={`${styles.right} ${net >= 0 ? styles.tdIncome : styles.tdExpense}`}>
-                      {net >= 0 ? '+' : '−'}¥{formatCurrency(Math.abs(net))}
+                      {net < 0 ? '−' : ''}¥{formatCurrency(Math.abs(net))}
                     </td>
                   </tr>
                 </tfoot>

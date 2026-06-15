@@ -43,9 +43,10 @@
 .rowLabel { font-size: 0.875rem; color: var(--stone-700); }
 .rowValue { font-size: 0.875rem; font-weight: 600; }
 
-.txnDate { font-size: 0.75rem; color: var(--stone-400); }
-.txnKind { font-size: 0.875rem; color: var(--stone-700); margin-top: 0.125rem; }
-.txnAmount { font-size: 0.875rem; font-weight: 600; }
-.txnAmount.income { color: var(--income); }
-.txnAmount.expense { color: var(--expense); }
-.txnAmount.transfer { color: var(--transfer); }
+.budgetRow { padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.375rem; }
+.budgetRow + .budgetRow { border-top: 1px solid var(--stone-100); }
+.budgetRowHeader { display: flex; justify-content: space-between; align-items: baseline; }
+.budgetRemaining { font-size: 0.75rem; font-weight: 500; }
+.budgetTrack { height: 0.5rem; background: var(--stone-100); border-radius: var(--radius-full); overflow: hidden; }
+.budgetFill { height: 100%; border-radius: var(--radius-full); transition: width 0.3s ease; }
+.budgetMeta { display: flex; justify-content: space-between; font-size: 0.6875rem; color: var(--stone-400); }

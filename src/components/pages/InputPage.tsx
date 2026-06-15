@@ -4,23 +4,25 @@ import {
   getAllPaymentMethods,
   getAllCategories,
   getAllTransactions,
+  getAllBudgets,
   addTransaction,
   updateTransaction,
-} from '../data/db';
-import { computeDeductions, calculateBalance } from '../core/logic';
-import { generateId, getTodayString, formatCurrency } from '../core/utils';
-import { NumberPad } from './NumberPad';
-import type { Fund, PaymentMethod, Category, Txn } from '../core/types';
-import styles from './InputScreen.module.css';
+} from '../../data/db';
+import { computeDeductions, calculateBalance } from '../../core/logic';
+import { generateId, getTodayString, formatCurrency, getCurrentMonthRange } from '../../core/utils';
+import { NumberPad } from '../molecules/NumberPad';
+import { Chip } from '../atoms/Chip';
+import type { Fund, PaymentMethod, Category, Txn, Budget } from '../../core/types';
+import styles from './InputPage.module.css';
 
 type InputKind = 'expense' | 'income' | 'transfer';
 
-interface InputScreenProps {
+interface InputPageProps {
   editingTxn?: Txn | null;
   onEditDone?: () => void;
 }
 
-export function InputScreen({ editingTxn, onEditDone }: InputScreenProps) {
+export function InputPage({ editingTxn, onEditDone }: InputPageProps) {
   const [kind, setKind] = useState<InputKind>('expense');
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState(getTodayString());
@@ -40,6 +42,7 @@ export function InputScreen({ editingTxn, onEditDone }: InputScreenProps) {
   const [methods, setMethods] = useState<PaymentMethod[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [transactions, setTransactions] = useState<Txn[]>([]);
+  const [budgets, setBudgets] = useState<Budget[]>([]);
   const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => { loadData(); }, []);
@@ -69,16 +72,18 @@ export function InputScreen({ editingTxn, onEditDone }: InputScreenProps) {
   }, [editingTxn]);
 
   const loadData = async () => {
-    const [fundsData, methodsData, categoriesData, txnsData] = await Promise.all([
+    const [fundsData, methodsData, categoriesData, txnsData, budgetsData] = await Promise.all([
       getAllFunds(),
       getAllPaymentMethods(),
       getAllCategories(),
       getAllTransactions(),
+      getAllBudgets(),
     ]);
     setFunds(fundsData);
     setMethods(methodsData);
     setCategories(categoriesData);
     setTransactions(txnsData);
+    setBudgets(budgetsData);
   };
 
   const resetForm = () => {
@@ -247,13 +252,12 @@ export function InputScreen({ editingTxn, onEditDone }: InputScreenProps) {
               <label className={styles.fieldLabel}>支払い方法</label>
               <div className={styles.chips}>
                 {methods.map((method) => (
-                  <button
+                  <Chip
                     key={method.id}
+                    label={method.name}
+                    selected={selectedMethodId === method.id}
                     onClick={() => setSelectedMethodId(method.id)}
-                    className={`${styles.chip} ${selectedMethodId === method.id ? styles.selected : ''}`}
-                  >
-                    {method.name}
-                  </button>
+                  />
                 ))}
               </div>
             </div>
@@ -264,15 +268,31 @@ export function InputScreen({ editingTxn, onEditDone }: InputScreenProps) {
               <label className={styles.fieldLabel}>カテゴリ</label>
               <div className={styles.chips}>
                 {expenseCategories.map((cat) => (
-                  <button
+                  <Chip
                     key={cat.id}
+                    label={cat.name}
+                    selected={selectedCategoryId === cat.id}
                     onClick={() => { setSelectedCategoryId(cat.id); setSelectedSubId(''); }}
-                    className={`${styles.chip} ${selectedCategoryId === cat.id ? styles.selected : ''}`}
-                  >
-                    {cat.name}
-                  </button>
+                  />
                 ))}
               </div>
+              {selectedCategoryId && (() => {
+                const budget = budgets.find(b => b.categoryId === selectedCategoryId);
+                if (!budget) return null;
+                const { start, end } = getCurrentMonthRange();
+                const spent = transactions
+                  .filter(t => t.kind === 'expense' && t.categoryId === selectedCategoryId && t.date >= start && t.date <= end)
+                  .reduce((s, t) => s + t.amount, 0);
+                const remaining = budget.amount - spent;
+                const isOver = remaining < 0;
+                return (
+                  <p className={`${styles.budgetHint} ${isOver ? styles.budgetHintOver : ''}`}>
+                    今月の残り予算：{isOver
+                      ? `¥${formatCurrency(Math.abs(remaining))} オーバー`
+                      : `¥${formatCurrency(remaining)} / ¥${formatCurrency(budget.amount)}`}
+                  </p>
+                );
+              })()}
             </div>
 
             {subcategories.length > 0 && (
@@ -280,13 +300,12 @@ export function InputScreen({ editingTxn, onEditDone }: InputScreenProps) {
                 <label className={styles.fieldLabel}>小分類（任意）</label>
                 <div className={styles.chips}>
                   {subcategories.map((sub) => (
-                    <button
+                    <Chip
                       key={sub.id}
+                      label={sub.name}
+                      selected={selectedSubId === sub.id}
                       onClick={() => setSelectedSubId(sub.id)}
-                      className={`${styles.chip} ${selectedSubId === sub.id ? styles.selected : ''}`}
-                    >
-                      {sub.name}
-                    </button>
+                    />
                   ))}
                 </div>
               </div>
@@ -300,13 +319,12 @@ export function InputScreen({ editingTxn, onEditDone }: InputScreenProps) {
               <label className={styles.fieldLabel}>入金先</label>
               <div className={styles.chips}>
                 {funds.map((fund) => (
-                  <button
+                  <Chip
                     key={fund.id}
+                    label={fund.name}
+                    selected={selectedFundId === fund.id}
                     onClick={() => setSelectedFundId(fund.id)}
-                    className={`${styles.chip} ${selectedFundId === fund.id ? styles.selected : ''}`}
-                  >
-                    {fund.name}
-                  </button>
+                  />
                 ))}
               </div>
             </div>
@@ -315,13 +333,12 @@ export function InputScreen({ editingTxn, onEditDone }: InputScreenProps) {
               <label className={styles.fieldLabel}>カテゴリ</label>
               <div className={styles.chips}>
                 {incomeCategories.map((cat) => (
-                  <button
+                  <Chip
                     key={cat.id}
+                    label={cat.name}
+                    selected={selectedIncomeCategoryId === cat.id}
                     onClick={() => setSelectedIncomeCategoryId(cat.id)}
-                    className={`${styles.chip} ${selectedIncomeCategoryId === cat.id ? styles.selected : ''}`}
-                  >
-                    {cat.name}
-                  </button>
+                  />
                 ))}
               </div>
             </div>
@@ -334,13 +351,12 @@ export function InputScreen({ editingTxn, onEditDone }: InputScreenProps) {
               <label className={styles.fieldLabel}>移動元</label>
               <div className={styles.chips}>
                 {funds.map((fund) => (
-                  <button
+                  <Chip
                     key={fund.id}
+                    label={fund.name}
+                    selected={fromFundId === fund.id}
                     onClick={() => setFromFundId(fund.id)}
-                    className={`${styles.chip} ${fromFundId === fund.id ? styles.selected : ''}`}
-                  >
-                    {fund.name}
-                  </button>
+                  />
                 ))}
               </div>
             </div>
@@ -349,13 +365,12 @@ export function InputScreen({ editingTxn, onEditDone }: InputScreenProps) {
               <label className={styles.fieldLabel}>移動先</label>
               <div className={styles.chips}>
                 {funds.map((fund) => (
-                  <button
+                  <Chip
                     key={fund.id}
+                    label={fund.name}
+                    selected={toFundId === fund.id}
                     onClick={() => setToFundId(fund.id)}
-                    className={`${styles.chip} ${toFundId === fund.id ? styles.selected : ''}`}
-                  >
-                    {fund.name}
-                  </button>
+                  />
                 ))}
               </div>
             </div>

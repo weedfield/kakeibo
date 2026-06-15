@@ -3,14 +3,15 @@ import { onAuthStateChanged } from 'firebase/auth'
 import type { User } from 'firebase/auth'
 import { auth } from './data/firebase'
 import { initializeSeedData } from './data/seed'
-import { BottomNav } from './components/BottomNav'
-import { BalanceScreen } from './components/BalanceScreen'
-import { HistoryScreen } from './components/HistoryScreen'
-import { InputScreen } from './components/InputScreen'
-import { AnalyticsScreen } from './components/AnalyticsScreen'
-import { SettingsScreen } from './components/SettingsScreen'
-import { LoginScreen } from './components/LoginScreen'
-import { IOSInstallBanner } from './components/IOSInstallBanner'
+import { executeRecurringTransactions } from './data/recurring'
+import { BottomNav } from './components/layout/BottomNav'
+import { BalancePage } from './components/pages/BalancePage'
+import { HistoryPage } from './components/pages/HistoryPage'
+import { InputPage } from './components/pages/InputPage'
+import { AnalyticsPage } from './components/pages/AnalyticsPage'
+import { SettingsPage } from './components/pages/SettingsPage'
+import { LoginPage } from './components/pages/LoginPage'
+import { IOSInstallBanner } from './components/layout/IOSInstallBanner'
 import type { Txn } from './core/types'
 import styles from './App.module.css'
 
@@ -35,6 +36,7 @@ function App() {
       setUser(u)
       if (u) {
         initializeSeedData()
+          .then(() => executeRecurringTransactions())
           .then(() => setIsInitialized(true))
           .catch(() => setIsInitialized(true))
       }
@@ -48,7 +50,7 @@ function App() {
   if (user === null) {
     return (
       <>
-        <LoginScreen />
+        <LoginPage />
         <IOSInstallBanner />
       </>
     )
@@ -61,17 +63,17 @@ function App() {
   const renderScreen = () => {
     switch (currentTab) {
       case 'balance':
-        return <BalanceScreen onNavigate={setCurrentTab} />
+        return <BalancePage onNavigate={setCurrentTab} />
       case 'history':
-        return <HistoryScreen onEditTxn={handleEditTxn} />
+        return <HistoryPage onEditTxn={handleEditTxn} />
       case 'input':
-        return <InputScreen editingTxn={editingTxn} onEditDone={() => { setEditingTxn(null); setCurrentTab('history'); }} />
+        return <InputPage editingTxn={editingTxn} onEditDone={() => { setEditingTxn(null); setCurrentTab('history'); }} />
       case 'analytics':
-        return <AnalyticsScreen />
+        return <AnalyticsPage />
       case 'settings':
-        return <SettingsScreen />
+        return <SettingsPage />
       default:
-        return <BalanceScreen onNavigate={setCurrentTab} />
+        return <BalancePage onNavigate={setCurrentTab} />
     }
   }
 

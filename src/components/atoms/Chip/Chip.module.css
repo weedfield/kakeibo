@@ -1,0 +1,11 @@
+.chip {
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-full);
+  font-size: 0.875rem;
+  border: 1px solid var(--stone-300);
+  background: #fff;
+  color: var(--stone-700);
+  transition: background-color 0.15s, color 0.15s;
+}
+.chip.selected { background: var(--stone-900); color: #fff; border-color: var(--stone-900); }
+.chip:disabled { opacity: 0.5; cursor: not-allowed; }

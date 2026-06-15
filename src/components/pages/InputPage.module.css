@@ -24,16 +24,6 @@
 /* フィールドグループ */
 .fieldLabel { font-size: 0.875rem; color: var(--stone-600); margin-bottom: 0.5rem; display: block; }
 .chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-.chip {
-  padding: 0.5rem 1rem;
-  border-radius: var(--radius-full);
-  font-size: 0.875rem;
-  border: 1px solid var(--stone-300);
-  background: #fff;
-  color: var(--stone-700);
-  transition: background-color 0.15s, color 0.15s;
-}
-.chip.selected { background: var(--stone-900); color: #fff; border-color: var(--stone-900); }
 
 /* 按分プレビュー */
 .deductionPreview {
@@ -85,6 +75,14 @@
   from { opacity: 1; transform: translateX(-50%) translateY(0); }
   to   { opacity: 0; transform: translateX(-50%) translateY(-0.3rem); }
 }
+
+/* 残り予算ヒント */
+.budgetHint {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--stone-500);
+}
+.budgetHintOver { color: var(--expense); font-weight: 500; }
 
 /* 保存ボタン */
 .saveBtn {
