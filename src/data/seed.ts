@@ -1,24 +1,18 @@
 import type { Fund, PaymentMethod, Category } from '../core/types';
+import { auth } from './firebase';
 import {
   addFund,
   addPaymentMethod,
   addCategory,
-  getAllFunds,
 } from './db';
 
-/**
- * 初期データを投入する
- * 既にデータが存在する場合はスキップ
- */
 export async function initializeSeedData(): Promise<void> {
-  // 既にデータが存在するかチェック
-  const existingFunds = await getAllFunds();
-  if (existingFunds.length > 0) {
-    console.log('Seed data already exists, skipping initialization');
-    return;
-  }
+  const uid = auth.currentUser?.uid;
+  if (!uid) return;
 
-  console.log('Initializing seed data...');
+  const key = `kakeibo_seeded_${uid}`;
+  if (localStorage.getItem(key)) return;
+
 
   // 資金の作成
   const funds: Fund[] = [
@@ -137,5 +131,5 @@ export async function initializeSeedData(): Promise<void> {
     await addCategory(category);
   }
 
-  console.log('Seed data initialized successfully');
+  localStorage.setItem(key, '1');
 }
